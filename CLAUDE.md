@@ -15,6 +15,9 @@ poetry install -E openai-agents # For OpenAI Agents testing
 
 # Activate virtual environment
 poetry shell
+
+# Add development dependencies
+poetry install --with dev
 ```
 
 ### CLI Usage
@@ -28,6 +31,9 @@ agentic-radar scan langgraph -i path/to/code -o report.html
 agentic-radar scan crewai --harden-prompts -i examples/crewai/ -o report.html
 agentic-radar scan openai-agents -i examples/openai-agents/ -o report.html
 
+# Graph-only visualization (minimal output)
+agentic-radar scan langgraph --graph-only -i path/to/code -o graph.html
+
 # Test workflows for vulnerabilities (requires OPENAI_API_KEY)
 agentic-radar test openai-agents "path/to/script.py"
 agentic-radar test openai-agents --config custom_tests.yaml "script.py"
@@ -36,22 +42,38 @@ agentic-radar test openai-agents --config custom_tests.yaml "script.py"
 ### Testing and Quality
 ```bash
 # Run tests
-pytest
-pytest tests/cli_test.py  # Run specific test file
+pytest                            # Run all tests
+pytest tests/cli_test.py          # Run specific test file
+pytest tests/unit_tests/          # Run unit tests only
+pytest -v                         # Verbose output
+pytest --tb=short                 # Short traceback format
+
+# Browser testing (optional)
+pytest -m browser                 # Run browser tests only
+pytest -m "not browser"          # Skip browser tests (faster development)
+pip install pytest-playwright    # Install browser testing dependencies
+playwright install               # Install browser binaries
 
 # Run pre-commit checks (linting, formatting, type checking)
 pre-commit run --all-files
 
 # Individual quality checks
-ruff check agentic_radar/     # Lint
-ruff format agentic_radar/    # Format
-mypy agentic_radar/           # Type check
+ruff check agentic_radar/         # Lint
+ruff format agentic_radar/        # Format
+mypy agentic_radar/              # Type check
+
+# Poetry-specific commands
+poetry run pytest               # Run tests in Poetry environment
+poetry run pre-commit run --all-files
 ```
 
 ### Environment Variables
 Copy `.env.example` to `.env` and configure:
 - `OPENAI_API_KEY` - Required for prompt hardening and testing features
 - `AZURE_OPENAI_API_KEY` / `AZURE_OPENAI_ENDPOINT` - Alternative to OpenAI API
+
+## Project Timeline
+See `docs/project-gantt.md` for the complete development timeline and roadmap.
 
 ## Architecture
 
@@ -113,12 +135,25 @@ Copy `.env.example` to `.env` and configure:
 - `Tool` - External or custom tool with security classification
 - `Test` - Vulnerability test case with input and success conditions
 
-## Testing Notes
+## Testing Standards
 
-- Tests use pytest markers: `@pytest.mark.supported` and `@pytest.mark.not_supported`
+Agentic Radar uses a **tiered testing approach** for HTML+JavaScript reports:
+
+### Tier 1: Python Unit Tests (Required)
+- Test HTML generation, data serialization, CLI behavior
+- Use pytest markers: `@pytest.mark.supported` and `@pytest.mark.not_supported`
 - Framework analysis tests verify parsing of known code patterns
 - CLI tests validate command interfaces and error handling
 - Runtime tests require API keys and may make external calls
+
+### Tier 2: Browser Integration Tests (Optional)
+- Test JavaScript functionality and user interactions
+- Use `@pytest.mark.browser` marker to separate from unit tests
+- Test graph rendering, layout switching, parameter controls
+- Install with: `pip install pytest-playwright && playwright install`
+- Run with: `pytest -m browser` or skip with: `pytest -m "not browser"`
+
+See `docs/testing-standards.md` for complete testing guidelines and best practices.
 
 ## Security Considerations
 
