@@ -1,0 +1,1 @@
+# Browser tests for interactive HTML+JavaScript functionality
