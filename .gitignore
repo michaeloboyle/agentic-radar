@@ -18,4 +18,9 @@
 .venv
 /poetry.toml
 
-.env
+.env.swarm/sessions/
+
+# Personal development infrastructure (not for upstream)
+.claude/
+.swarm/
+scripts/claude-flow/
